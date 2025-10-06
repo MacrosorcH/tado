@@ -14,5 +14,6 @@
   },
   "iot_class": "cloud_polling",
   "loggers": ["PyTado"],
-  "requirements": ["python-tado==0.18.15"]
+  "requirements": ["https://github.com/MacrosorcH/PyTado/archive/refs/tags/v1.0.0.zip"]
+  "version": "140761"
 }
