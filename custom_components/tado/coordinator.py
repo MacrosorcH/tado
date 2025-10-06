@@ -12,6 +12,7 @@ from requests import RequestException
 from homeassistant.components.climate import PRESET_AWAY, PRESET_HOME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 if TYPE_CHECKING:
@@ -32,7 +33,8 @@ _LOGGER = logging.getLogger(__name__)
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=4)
 SCAN_INTERVAL = timedelta(minutes=5)
 SCAN_MOBILE_DEVICE_INTERVAL = timedelta(minutes=5)
-
+# Set lowest cooldown possible, down to 1 from default of 10
+REQUEST_REFRESH_DEFAULT_COOLDOWN = 1
 
 class TadoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict]]):
     """Class to manage API calls from and to Tado via PyTado."""
@@ -56,6 +58,13 @@ class TadoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict]]):
             config_entry=config_entry,
             name=DOMAIN,
             update_interval=SCAN_INTERVAL,
+            # Add custom debouncer with lowest cooldown possible
+            request_refresh_debouncer=Debouncer(
+                hass,
+                _LOGGER,
+                cooldown=REQUEST_REFRESH_DEFAULT_COOLDOWN,
+                immediate=True,
+            ),
         )
         self._tado = tado
         self._refresh_token = config_entry.data[CONF_REFRESH_TOKEN]
