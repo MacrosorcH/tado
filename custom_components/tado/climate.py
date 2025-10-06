@@ -23,7 +23,8 @@ from homeassistant.components.climate import (
     HVACAction,
     HVACMode,
 )
-from homeassistant.const import ATTR_TEMPERATURE, PRECISION_TENTHS, UnitOfTemperature
+# Added import for PRECISION_HALVES
+from homeassistant.const import ATTR_TEMPERATURE, PRECISION_TENTHS, PRECISION_HALVES, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -238,6 +239,9 @@ async def create_climate_entity(
         heat_min_temp = float(heat_temperatures["celsius"]["min"])
         heat_max_temp = float(heat_temperatures["celsius"]["max"])
         heat_step = heat_temperatures["celsius"].get("step", PRECISION_TENTHS)
+        # If precision is 0.1, force to 0.5 for Riscaldamenti, otherwise assume it's 1.0 for Climatizzatori
+        if heat_step == PRECISION_TENTHS:
+            heat_step = PRECISION_HALVES
 
     if cool_temperatures is not None:
         cool_min_temp = float(cool_temperatures["celsius"]["min"])
@@ -477,9 +481,8 @@ class TadoClimate(TadoZoneEntity, ClimateEntity):
     @property
     def target_temperature(self) -> float | None:
         """Return the temperature we try to reach."""
-        if self._current_tado_hvac_mode == CONST_MODE_OFF:
-            return TADO_DEFAULT_MIN_TEMP
-        return self._tado_zone_data.target_temp
+        # Reverted https://github.com/home-assistant/core/pull/135480/files that would otherwise set to 5 degrees when off
+        return self._tado_zone_data.target_temp or self._tado_zone_data.current_temp
 
     async def set_timer(
         self,
