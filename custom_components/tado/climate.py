@@ -527,6 +527,12 @@ class TadoClimate(TadoZoneEntity, ClimateEntity):
             return
 
         new_hvac_mode = CONST_MODE_COOL if self._ac_device else CONST_MODE_HEAT
+
+        if new_hvac_mode == CONST_MODE_COOL:
+            # Force fan to AUTO when switching to cool mode
+            self._current_tado_fan_speed = CONST_FAN_AUTO
+            self._current_tado_fan_level = CONST_FAN_AUTO
+        
         await self._control_hvac(target_temp=temperature, hvac_mode=new_hvac_mode)
         await self.coordinator.async_request_refresh()
 
