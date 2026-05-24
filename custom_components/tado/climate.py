@@ -535,9 +535,16 @@ class TadoClimate(TadoZoneEntity, ClimateEntity):
         _LOGGER.debug(
             "Setting new hvac mode for device %s to %s", self._device_id, hvac_mode
         )
-        await self._control_hvac(hvac_mode=HA_TO_TADO_HVAC_MODE_MAP[hvac_mode])
-        await self.coordinator.async_request_refresh()
+        tado_hvac_mode = HA_TO_TADO_HVAC_MODE_MAP[hvac_mode]
 
+        if tado_hvac_mode == CONST_MODE_COOL:
+            # Force fan to AUTO when switching to cool mode
+            self._current_tado_fan_speed = CONST_FAN_AUTO
+            self._current_tado_fan_level = CONST_FAN_AUTO
+
+        await self._control_hvac(hvac_mode=tado_hvac_mode)
+        await self.coordinator.async_request_refresh()
+    
     @property
     def available(self) -> bool:
         """Return if the device is available."""
