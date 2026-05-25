@@ -30,8 +30,8 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Set scan interval to 1 minute, down from default of 5
-SCAN_INTERVAL = timedelta(minutes=1)
+MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=4)
+SCAN_INTERVAL = timedelta(minutes=5)
 # Set lowest cooldown possible, down to 1 from default of 10
 REQUEST_REFRESH_DEFAULT_COOLDOWN = 1
 
