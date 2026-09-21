@@ -30,6 +30,16 @@ class TadoDeviceEntity(TadoCoordinatorEntity):
         self.device_name = device_info["serialNo"]
         self.device_id = device_info["shortSerialNo"]
         via_device_id: str | None = None
+        if device_info["deviceType"] not in TADO_BRIDGE_MODELS:
+            for device in coordinator.data["device"].values():
+                if device["deviceType"] in TADO_BRIDGE_MODELS:
+                    via_device_id = dr.async_get_device_id_by_identifier(
+                        coordinator.hass,
+                        (DOMAIN, device["shortSerialNo"]),
+                        config_entry_id=coordinator.config_entry.entry_id,
+                    )
+                    break
+
         self._attr_device_info = DeviceInfo(
             configuration_url=f"https://app.tado.com/en/main/settings/rooms-and-devices/device/{self.device_name}",
             identifiers={(DOMAIN, self.device_id)},
@@ -37,12 +47,9 @@ class TadoDeviceEntity(TadoCoordinatorEntity):
             manufacturer=DEFAULT_NAME,
             sw_version=device_info["currentFwVersion"],
             model=device_info["deviceType"],
-            via_device_id = dr.async_get_device_id_by_identifier(
-                coordinator.hass,
-                (DOMAIN, device["shortSerialNo"]),
-                config_entry_id=coordinator.config_entry.entry_id,
-            )
         )
+        if via_device_id:
+            self._attr_device_info["via_device_id"] = via_device_id
 
 
 class TadoHomeEntity(TadoCoordinatorEntity):
