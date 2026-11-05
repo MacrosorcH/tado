@@ -274,7 +274,7 @@ async def create_climate_entity(
 class TadoClimate(TadoZoneEntity, ClimateEntity):
     """Representation of a Tado climate entity."""
 
-    _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_name = None
     _attr_translation_key = DOMAIN
     _available = False
@@ -400,7 +400,7 @@ class TadoClimate(TadoZoneEntity, ClimateEntity):
         return self._tado_zone_data.current_humidity
 
     @property
-    def current_temperature(self) -> float | None:
+    def native_current_temperature(self) -> float | None:
         """Return the sensor temperature."""
         return self._tado_zone_data.current_temp
 
@@ -479,7 +479,7 @@ class TadoClimate(TadoZoneEntity, ClimateEntity):
         return self._heat_step or self._cool_step
 
     @property
-    def target_temperature(self) -> float | None:
+    def native_target_temperature(self) -> float | None:
         """Return the temperature we try to reach."""
         # Reverted https://github.com/home-assistant/core/pull/135480/files that would otherwise set to 5 degrees when off
         return self._tado_zone_data.target_temp or self._tado_zone_data.current_temp
